@@ -8,23 +8,77 @@ import requests
 
 
 class EmptyDatabaseError(Exception):
-    """A custom exception raised when a city does not exist in the database."""
+    """A custom exception of a Forecast class"""
 
 
 class InvalidCityNameError(Exception):
-    """A custom exception raised when a city name is not a string."""
+    """A custom exception of a Forecast class"""
 
 
 class Forecast:
+    """A class used to represent an hourly forecast for a given city
+
+    ...
+
+    Attributes
+    -------
+    API_KEY : str
+        An individual key used to access API
+    CITY_SEARCH_URL : str
+        A URL used for looking up a city
+    FORECAST_URL : str
+        A URL used for looking up an hourly forecast for a city
+    DEGREE_SIGN : str
+        A degree sign
+    city : str
+        A name of a city
+
+    Methods
+    -------
+    get_location_key()
+        Gets a location key based on a city name
+    get_forecast()
+        Gets an hourly forecast based on a location key
+
+    Raises
+    ------
+    EmptyDatabaseError
+        An exception raised when a city does not exist in the database
+    InvalidCityNameError
+        An exception raised when a city name is not a string
+    """
+
     API_KEY = os.environ.get("API_KEY")
     CITY_SEARCH_URL = "http://dataservice.accuweather.com/locations/v1/cities/search/"
     FORECAST_URL = "http://dataservice.accuweather.com/forecasts/v1/hourly/1hour/"
     DEGREE_SIGN = "\N{DEGREE SIGN}"
 
     def __init__(self, city: str):
+        """
+        Parameters
+        ----------
+        city : str
+            A name of a city
+        """
         self.city = city
 
     def get_location_key(self) -> str | None:
+        """
+        Gets a location key based on a city name
+
+        Returns
+        -------
+        str | None
+            A location key
+
+        Raises
+        ------
+        EmptyDatabaseError
+            An exception raised when a city does not exist in the database
+        InvalidCityNameError
+            An exception raised when a city name is not a string
+        """
+
         r = requests.get(
             self.CITY_SEARCH_URL, params={"apikey": self.API_KEY, "q": self.city}
         )
@@ -42,6 +96,8 @@ class Forecast:
         return location_key
 
     def get_forecast(self) -> None:
+        """Gets an hourly forecast based on a location key"""
+
         location_key = self.get_location_key()
         r = requests.get(
             f"{self.FORECAST_URL}{location_key}",
